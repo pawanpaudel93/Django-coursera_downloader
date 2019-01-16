@@ -1,1 +1,1 @@
-web: gunicorn coursera_downloader.wsgi
+web: waitress-serve --port=$PORT coursera_downloader.wsgi:application
