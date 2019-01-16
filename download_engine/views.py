@@ -6,7 +6,7 @@ from coursera_downloader.settings import PROJECT_ROOT
 from splinter import Browser
 import base64, getpass, json, os, re, requests, sys, time
 from bs4 import BeautifulSoup
-from selenium.webdriver import ChromeOptions
+from selenium.webdriver.chrome.options import Options 
 
 # some constants
 loading_time = 5
@@ -307,9 +307,10 @@ def downloader(request, slug):
     # button.click()
     # Buttons submit
     # browser.quit()
-    opts = webdriver.ChromeOptions()
+    opts = Options()
     opts.add_argument('--no-sandbox')
     opts.add_argument('--disable-gpu')
+    opts.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
     executable_path = {'executable_path': PROJECT_ROOT+"/static/coursera_downloader/chromedriver"}
     browser = Browser('chrome', **executable_path, chrome_options=opts)
     browser.visit('https://www.coursera.org/courses?authMode=login')
