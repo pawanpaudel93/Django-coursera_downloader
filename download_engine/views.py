@@ -313,7 +313,7 @@ def downloader(request, slug):
     opts.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
     # executable_path = {'executable_path': PROJECT_ROOT+"/static/coursera_downloader/chromedriver"}
     # browser = Browser('chrome', **executable_path, chrome_options=opts, headless=True)
-        browser = Browser('chrome', chrome_options=opts, headless=True)
+    browser = Browser('chrome', chrome_options=opts, headless=True)
 
     browser.visit('https://www.coursera.org/courses?authMode=login')
 
