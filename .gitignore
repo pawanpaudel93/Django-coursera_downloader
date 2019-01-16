@@ -1,0 +1,9 @@
+.idea
+venv
+*.sqlite3
+**/__pycache__/
+**/media/
+*.py[cod]
+*.env
+local.py
+*.http
