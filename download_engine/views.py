@@ -312,7 +312,7 @@ def downloader(request, slug):
     opts.add_argument('--disable-gpu')
     opts.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
     executable_path = {'executable_path': PROJECT_ROOT+"/static/coursera_downloader/chromedriver"}
-    browser = Browser('chrome', **executable_path, chrome_options=opts)
+    browser = Browser('chrome', **executable_path, chrome_options=opts, headless=True)
     browser.visit('https://www.coursera.org/courses?authMode=login')
 
     browser.fill('email', details['username'])
