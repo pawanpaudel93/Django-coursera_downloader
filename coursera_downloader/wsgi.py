@@ -10,9 +10,9 @@ https://docs.djangoproject.com/en/2.1/howto/deployment/wsgi/
 import os
 
 from django.core.wsgi import get_wsgi_application
-# from whitenoise.django import DjangoWhiteNoise
+from whitenoise import WhiteNoise
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'coursera_downloader.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'coursera_downloader.settings.production')
 
 application = get_wsgi_application()
-# application = DjangoWhiteNoise(application)
+application = WhiteNoise(application)

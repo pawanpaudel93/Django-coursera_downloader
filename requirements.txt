@@ -1,4 +1,5 @@
 astroid==2.1.0
+b2blaze==0.2.1
 beautifulsoup4==4.7.1
 bs4==0.0.1
 certifi==2018.11.29
@@ -9,7 +10,7 @@ Django==2.1.5
 django-heroku==0.3.1
 EasyProcess==0.2.5
 gunicorn==19.9.0
-idna==2.8
+idna==2.7
 isort==4.3.4
 lazy-object-proxy==1.3.1
 lxml==4.3.0
@@ -21,13 +22,13 @@ pylint==2.2.2
 python-decouple==3.1
 pytz==2018.9
 PyVirtualDisplay==0.2.1
-requests==2.21.0
+requests==2.19.1
 selenium==3.141.0
 six==1.12.0
 soupsieve==1.7
 splinter==0.10.0
 typed-ast==1.1.1
-urllib3==1.24.1
+urllib3==1.23
 waitress==1.2.0
 whitenoise==4.1.2
 wrapt==1.11.0

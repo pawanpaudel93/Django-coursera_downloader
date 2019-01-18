@@ -2,12 +2,16 @@ from django.shortcuts import render
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from django.shortcuts import render
-from coursera_downloader.settings import PROJECT_ROOT
+from coursera_downloader.settings.base import PROJECT_ROOT
 from splinter import Browser
-import base64, getpass, json, os, re, requests, sys, time
+import base64, getpass, json, os, re, requests, sys, time, shutil
 from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.options import Options 
+from b2blaze import B2
 
+# backblaze
+b2 = B2(key_id='0007a193149c7e90000000004', application_key='K000Ul5RC4eq6VvCV8PY6wPVDA/Vugc')
+bucket = b2.buckets.get('cdownloader')
 # some constants
 loading_time = 5
 homepage='https://www.coursera.org'
@@ -274,44 +278,18 @@ def check_quiz(browser, lesson_id, lesson_title, lesson_url):
         print('quiz already downloaded.')
     else:
         quiz_downloader(browser, lesson_id, lesson_title, lesson_url)
-        
 
 
 def downloader(request, slug):
     slug = slug.encode('utf-8')
     details = eval(base64.b64decode(slug))
-    # chrome_options = webdriver.ChromeOptions()
-    # chrome_options.add_argument('--headless')
-    # browser = webdriver.Chrome(executable_path=PROJECT_ROOT+"/static/coursera_downloader/chromedriver",
-    # chrome_options=chrome_options)
-
-    # SAUCE_USERNAME = '72bct631'
-    # SAUCE_ACCESS_KEY = 'b0b78439-b4b5-4abc-9765-bd69191de839'
-
-    # browser = webdriver.Remote(
-    #     desired_capabilities=webdriver.DesiredCapabilities.CHROME,
-    #     command_executor='http://%s:%s@ondemand.saucelabs.com:80/wd/hub' %
-    #     (SAUCE_USERNAME, SAUCE_ACCESS_KEY))
-
-    # print(browser)\
-    # browser.get('https://www.coursera.org/?authMode=login')
-    # username = re.findall('emailInput\_[\d]+\-input', browser.page_source)
-    # password = re.findall('passwordInput\_[\d]+\-input', browser.page_source)
-    # username = browser.find_element_by_id(username[0])
-    # password = browser.find_element_by_id(password[0])
-    # button = browser.find_element_by_xpath("//*[contains(@class,'Button_clbp6a-o_O-primary_cv02ee-o_O-md_1jvotax w-100')]")
-
-    # username.send_keys("pawanpaudel93@gmail.com")
-    # password.send_keys("pawanpaudel33")
-    # print('HEy==>',button)
-    # button.click()
-    # Buttons submit
-    # browser.quit()
+    
     opts = Options()
     opts.add_argument('--no-sandbox')
     opts.add_argument('--disable-gpu')
+    opts.add_argument('--headless')
     opts.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
-    # executable_path = {'executable_path': PROJECT_ROOT+"/static/coursera_downloader/chromedriver"}
+    # executable_path = {'executable_path': "/home/pawan/PycharmProjects/Django-Coursera-Downloader/cdownloader/static/coursera_downloader/chromedriver"}
     # browser = Browser('chrome', **executable_path, chrome_options=opts, headless=True)
     browser = Browser('chrome', chrome_options=opts, headless=True)
 
@@ -424,6 +402,16 @@ def downloader(request, slug):
             
         print()
     print('Resources downloaded to:\n'+os.getcwd())
+    Resource_folder = os.getcwd() #Folder which is to be zipped
     os.chdir(initial_dirname)
+    shutil.make_archive(os.getcwd()+'/'+course_title,'zip', Resource_folder)
+    os.chdir(initial_dirname)
+    large_file = open(course_title+'.zip', 'rb')
+    zipped_file = bucket.files.upload(contents=large_file,file_name=course_title+'.zip')
+    print('The file is uploaded')
+    os.rmdir(course_title)
+    os.remove(course_title+'.zip')
+    print('Files and folder has been removed as well')
+    print(os.listdir(os.getcwd()))
     browser.quit()
     return render(request, 'download_engine/download_engine.html')
