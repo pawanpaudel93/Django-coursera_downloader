@@ -5,4 +5,4 @@ from download_engine.models import Form
 class DownloadForm(ModelForm):
     class Meta:
         model = Form
-        fields = ['username', 'password', 'course_link']
+        fields = ['email', 'coursera_username', 'coursera_password', 'course_link']

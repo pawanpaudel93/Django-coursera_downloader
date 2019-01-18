@@ -8,6 +8,9 @@ import base64, getpass, json, os, re, requests, sys, time, shutil
 from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.options import Options 
 from b2blaze import B2
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 # backblaze
 b2 = B2(key_id='0007a193149c7e90000000004', application_key='K000Ul5RC4eq6VvCV8PY6wPVDA/Vugc')
@@ -279,6 +282,26 @@ def check_quiz(browser, lesson_id, lesson_title, lesson_url):
     else:
         quiz_downloader(browser, lesson_id, lesson_title, lesson_url)
 
+## send download link mail
+def send_mail(sendto, body, subject):
+    fromaddr = "coursera.vdownloader@gmail.com"
+    toaddr = sendto
+    msg = MIMEMultipart()
+    msg['From'] = fromaddr
+    msg['To'] = toaddr
+    msg['Subject'] = "Coursera Course Download Link for " + subject
+
+    body = body
+    msg.attach(MIMEText(body, 'plain'))
+
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.ehlo()
+    server.starttls()
+    server.ehlo()
+    server.login("coursera.vdownloader@gmail.com", "vO4F8YP8PjIgUYzqR8Ts")
+    text = msg.as_string()
+    server.sendmail(fromaddr, toaddr, text)
+    server.quit()
 
 def downloader(request, slug):
     slug = slug.encode('utf-8')
@@ -406,12 +429,19 @@ def downloader(request, slug):
     os.chdir(initial_dirname)
     shutil.make_archive(os.getcwd()+'/'+course_title,'zip', Resource_folder)
     os.chdir(initial_dirname)
+    ## for uploading to backblaze
     large_file = open(course_title+'.zip', 'rb')
     zipped_file = bucket.files.upload(contents=large_file,file_name=course_title+'.zip')
     print('The file is uploaded')
-    os.rmdir(course_title)
+    ## removing folders and zip
+    shutil.rmtree(course_title, ignore_errors=True)
     os.remove(course_title+'.zip')
     print('Files and folder has been removed as well')
     print(os.listdir(os.getcwd()))
+    # getting url of the file uploaded
+    file = bucket.files.get(file_name=course_title+'.zip')
+    ## send mail to downloader
+    body = "The download link is " + str(file.url)
+    send_mail(details['email'], body, course_title)
     browser.quit()
     return render(request, 'download_engine/download_engine.html')
