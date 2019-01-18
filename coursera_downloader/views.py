@@ -8,7 +8,7 @@ class Home(TemplateView):
     def post(self, request):
         form = DownloadForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data('email')
+            email = form.cleaned_data['email']
             username = form.cleaned_data['coursera_username']
             password = form.cleaned_data['coursera_password']
             course_link = form.cleaned_data['course_link']
