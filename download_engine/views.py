@@ -445,4 +445,4 @@ def downloader(request, slug):
     send_mail(details['username'], body, course_title)
     print('Email sent')
     browser.quit()
-    return render(request, 'download_engine/download_engine.html', {"email_body": body})
+    return render(request, 'download_engine/downloading.html', {"email_body": body})

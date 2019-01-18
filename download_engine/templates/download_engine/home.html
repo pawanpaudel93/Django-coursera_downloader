@@ -1,16 +1,30 @@
-<html>
-<body>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> 
-    <form method="post" action="" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button id="submitbtn" type="submit" onclick="Click()">Download</button>
-    </form>
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
     <script type="text/javascript"> 
         function Click(){
-            var delay = 10000; 
+            var delay = 8000; 
             window.setTimeout(function(){ window.location.href = "{% url 'downloading' %}";}, delay);
         };
     </script>
-</body>
-</html>
+    <div class="ui column stackable center page grid" method="post" action="" enctype="multipart/form-data">
+        <div class="four wide column"></div><!-- empty div just padding -->
+        <form method="post" enctype="multipart/form-data" class="ui seven wide column form segment raised">
+            {% csrf_token %}
+            <div class="field">
+                <label>Coursera Username</label>
+                {{form.coursera_username}}
+            </div>
+            <div class="field">
+                <label>Coursera Password</label>
+                {{form.coursera_password}}
+            </div>
+            <div class="field">
+                <label>Coursera Link</label>
+                {{form.course_link}}
+            </div>
+            <button class="ui button" type="submit" onclick="Click()">Download</button>
+        </form>
+    </div>
+{% endblock %}

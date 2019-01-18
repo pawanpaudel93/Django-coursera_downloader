@@ -1,6 +1,10 @@
-<html>
-<body>
-    Download Complete !!
-    {{email_body}}
-</body>
-</html>
+{% extends 'base.html' %}
+{% block content %}
+    <div class="ui column stackable center page grid">
+        <div class="three wide column"></div><!-- empty div just padding -->
+        <p class="ui ten wide column form segment raised">
+            Download Complete !!
+            {{email_body}}
+        </p>
+    </div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Standard Meta -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    {% comment %} <link rel="icon" href="{% static 'img/favicon.ico' %}"> {% endcomment %}
+
+    <!-- Title here -->
+    <title>{% block title %}Coursera Downloader{% endblock %}</title>
+
+    <!-- Css files link here -->
+    {% comment %} <link rel="stylesheet" href="{% static 'css/semantic.css' %}"> {% endcomment %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.11.8/semantic.min.css"/>
+    {% comment %} <link rel="stylesheet" href="{% static 'css/home.css' %}"> {% endcomment %}
+
+   <!-- Fonts and icons -->
+    <link href="https://fonts.googleapis.com/css?family=Oleo+Script+Swash+Caps" rel="stylesheet">
+
+    <!-- {# stylesheet for respective pages goes here #} -->
+
+    {% block stylesheet %}{% endblock %}
+</head>
+<body>
+{%block navbar%}{% include 'navbar.html' %} {%endblock navbar%}
+
+{# this block name must not be changed #}
+{% block content %}{% endblock %}
+
+<!-- script for semantic-ui -->
+{% comment %} <script type="text/javascript" src="{% static 'js/jquery-3.1.1.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/semantic.js' %}"></script> {% endcomment %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.11.8/semantic.min.js"></script>
+
+{# javascript goes here #}
+{% block script %}{% endblock %}
+</body>
+</html>

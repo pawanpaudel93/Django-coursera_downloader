@@ -1,7 +1,14 @@
-<html>
-<body>
-    Thank You for using this website...
-    Please check your mail after 10 minutes for the download link.
-    Don't close the tab if you cannot check your mail for download link. It will appear here after some time.
-</body>
-</html>
+{% extends 'base.html' %}
+{% block content %}
+    <div class="ui column stackable center page grid">
+        <div class="three wide column"></div><!-- empty div just padding -->
+        <h1 class="ui ten wide column form segment raised">
+            <p>Thank You for using this website...
+            Please check your mail after 10 minutes for the download link.</p>
+        </h1>
+        {%if email_body%}
+            {{Download Complete !!
+            {{email_body}}
+        {%endif%}
+    </div>
+{% endblock %}
