@@ -8,7 +8,10 @@
             window.setTimeout(function(){ window.location.href = "{% url 'downloading' %}";}, delay);
         };
     </script>
-    <div class="ui column stackable center page grid" method="post" action="" enctype="multipart/form-data">
+    {% if error_message %}
+        {{error_message}}
+    {%endif%}
+    <div class="ui column stackable center page grid">
         <div class="four wide column"></div><!-- empty div just padding -->
         <form method="post" enctype="multipart/form-data" class="ui seven wide column form segment raised">
             {% csrf_token %}

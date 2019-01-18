@@ -331,8 +331,8 @@ def downloader(request, slug):
         if(error=='Wrong email or password. Please try again!'):
             print('Wrong email or password. Please try again!')
             browser.quit()
-    except:
-        pass
+    except ConnectionRefusedError:
+        return render(request, 'download_engine/downloading.html', {"error_message": "Wrong email or password. Please try again!"})
 
     # give the link of course in which you are enrolled and you want to download
     course_link=details['course_link']
