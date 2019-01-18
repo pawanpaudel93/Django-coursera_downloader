@@ -4,15 +4,13 @@
     <form method="post" action="" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
-        <input id="submitbtn" type="submit" value="Download" />
+        <button id="submitbtn" type="submit" onclick="Click()">Download</button>
     </form>
     <script type="text/javascript"> 
-    $(document).ready(function(){
-            $('#submitbtn').onclick(funcion(){
-                var delay = 5000; 
-                window.setTimeout(function(){ window.location.href = "{% url 'downloading' %}"; }, delay);
-            });
-        })
+        function Click(){
+            var delay = 7000; 
+            window.setTimeout(function(){ window.location.href = {% url 'downloading' %};}, delay);
+        };
     </script>
 </body>
 </html>
