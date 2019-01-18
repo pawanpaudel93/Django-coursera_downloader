@@ -1,9 +1,18 @@
 <html>
 <body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> 
     <form method="post" action="" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
-        <input type="submit" value="Download" />
+        <input id="submitbtn" type="submit" value="Download" />
     </form>
+    <script type="text/javascript"> 
+    $(document).ready(function(){
+            $('#submitbtn').onclick(funcion(){
+                var delay = 5000; 
+                window.setTimeout(function(){ window.location.href = "{% url 'downloading' %}"; }, delay);
+            });
+        })
+    </script>
 </body>
 </html>

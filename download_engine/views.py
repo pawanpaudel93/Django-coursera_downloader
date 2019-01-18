@@ -439,9 +439,9 @@ def downloader(request, slug):
     print('Files and folder has been removed as well')
     print(os.listdir(os.getcwd()))
     # getting url of the file uploaded
-    file = bucket.files.get(file_name=course_title+'.zip')
+    file_url = "https://f000.backblazeb2.com/file/cdownloader/"+ course_title + '.zip'
     ## send mail to downloader
-    body = "The download link is " + str(file.url)
+    body = "The download link is " + str(file_url)
     send_mail(details['email'], body, course_title)
     print('Email sent')
     browser.quit()

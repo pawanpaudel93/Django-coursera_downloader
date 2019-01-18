@@ -21,3 +21,6 @@ class Home(TemplateView):
     def get(self, request):
         form = DownloadForm()
         return render(request, self.template_name, {'form': form})
+
+def downloading(request):
+    return render(request, 'download_engine/downloading.html')
