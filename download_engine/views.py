@@ -443,5 +443,6 @@ def downloader(request, slug):
     ## send mail to downloader
     body = "The download link is " + str(file.url)
     send_mail(details['email'], body, course_title)
+    print('Email sent')
     browser.quit()
     return render(request, 'download_engine/download_engine.html')
