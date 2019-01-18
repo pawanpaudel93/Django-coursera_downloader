@@ -8,11 +8,10 @@ class Home(TemplateView):
     def post(self, request):
         form = DownloadForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data['email']
             username = form.cleaned_data['coursera_username']
             password = form.cleaned_data['coursera_password']
             course_link = form.cleaned_data['course_link']
-            details = {'email': email, 'username': username, 'password': password,'course_link': course_link}
+            details = {'username': username, 'password': password, 'course_link': course_link}
             encoded_dict = str(details).encode('utf-8')
             base64_details = base64.b64encode(encoded_dict)
             return redirect('downloader',slug=base64_details.decode('utf-8'))
@@ -22,5 +21,5 @@ class Home(TemplateView):
         form = DownloadForm()
         return render(request, self.template_name, {'form': form})
 
-def downloading(request):
+def downloading_file(request):
     return render(request, 'download_engine/downloading.html')

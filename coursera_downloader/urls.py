@@ -23,6 +23,6 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('download/', include(testUrl)),
-    path('downloading/', views.downloading, name="downloading"),
+    path('downloading/', views.downloading_file, name="downloading"),
     path('', views.Home.as_view(), name='home')
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

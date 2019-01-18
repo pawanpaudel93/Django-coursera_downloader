@@ -306,7 +306,7 @@ def send_mail(sendto, body, subject):
 def downloader(request, slug):
     slug = slug.encode('utf-8')
     details = eval(base64.b64decode(slug))
-    
+    print('Details', details)
     opts = Options()
     opts.add_argument('--no-sandbox')
     opts.add_argument('--disable-gpu')
@@ -442,7 +442,7 @@ def downloader(request, slug):
     file_url = "https://f000.backblazeb2.com/file/cdownloader/"+ course_title + '.zip'
     ## send mail to downloader
     body = "The download link is " + str(file_url)
-    send_mail(details['email'], body, course_title)
+    send_mail(details['username'], body, course_title)
     print('Email sent')
     browser.quit()
-    return render(request, 'download_engine/download_engine.html', {"body": body})
+    return render(request, 'download_engine/download_engine.html', {"email_body": body})
