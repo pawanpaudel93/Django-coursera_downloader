@@ -251,7 +251,7 @@ def quiz_downloader(browser, lesson_id, lesson_title, lesson_url):
     if lesson_url not in browser.driver.current_url:
         # print(lesson_url)
         browser.visit(homepage+lesson_url)
-        time.sleep(loading_time+3)
+        time.sleep(loading_time)
         
     button_click(browser, 'Continue')
     button_click(browser, 'Start')
@@ -305,7 +305,7 @@ def downloader(request, course_title):
     # backblaze
     b2 = B2(key_id=config('B2_KEY_ID'), application_key=config('B2_APPLICATION_KEY'))
     bucket = b2.buckets.get('cdownloader')
-    details = {'username': request.session['username'], 'password': request.session['password'], 'course_link': request.session['course_link']}
+    details = {'email': request.session['email'],'username': request.session['username'], 'password': request.session['password'], 'course_link': request.session['course_link']}
     print('Details', details)
     opts = Options()
     opts.add_argument('--no-sandbox')
@@ -441,8 +441,8 @@ def downloader(request, course_title):
     file_url = "https://f000.backblazeb2.com/file/cdownloader/"+ course_title + '.zip'
     ## send mail to downloader
     body = "The download link is " + str(file_url)
-    send_mail(details['username'], body, course_title)
+    send_mail(details['email'], body, course_title)
     print('Email sent')
     browser.quit()
-    request.response['email_body'] = body
+    request.session['email_body'] = body
     return redirect('downloading')
