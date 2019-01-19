@@ -4,5 +4,5 @@ from .views import downloader
 
 
 urlpatterns = [
-    path('<slug:slug>/', downloader, name='downloader'),
+    path('course/<slug:course_title>/', downloader, name='downloader'),
 ]

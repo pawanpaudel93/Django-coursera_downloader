@@ -11,10 +11,21 @@
     {% if error_message %}
         {{error_message}}
     {%endif%}
+    <p class="ui column stackable center page grid">
+    <div class="four wide column"></div>
+        <h4 class="ui form segment raised">
+            Download Coursera Courses here....
+            Email is used to send you download link.
+        </h4>
+    </p>
     <div class="ui column stackable center page grid">
         <div class="four wide column"></div><!-- empty div just padding -->
         <form method="post" enctype="multipart/form-data" class="ui seven wide column form segment raised">
             {% csrf_token %}
+            <div class="field">
+                <label>Email</label>
+                {{form.email}}
+            </div>
             <div class="field">
                 <label>Coursera Username</label>
                 {{form.coursera_username}}
@@ -27,7 +38,7 @@
                 <label>Coursera Link</label>
                 {{form.course_link}}
             </div>
-            <button class="ui button" type="submit" onclick="Click()">Download</button>
+            <button class="ui button blue" type="submit" onclick="Click()">Download</button>
         </form>
     </div>
 {% endblock %}

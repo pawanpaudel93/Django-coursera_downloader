@@ -8,3 +8,4 @@ venv
 local.py
 *.http
 .vscode/
+*/migrations/

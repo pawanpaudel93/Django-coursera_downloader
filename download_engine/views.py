@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from coursera_downloader.settings.base import PROJECT_ROOT
 from splinter import Browser
 import base64, getpass, json, os, re, requests, sys, time, shutil
@@ -11,10 +11,8 @@ from b2blaze import B2
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from decouple import config
 
-# backblaze
-b2 = B2(key_id='0007a193149c7e90000000004', application_key='K000Ul5RC4eq6VvCV8PY6wPVDA/Vugc')
-bucket = b2.buckets.get('cdownloader')
 # some constants
 loading_time = 5
 homepage='https://www.coursera.org'
@@ -284,7 +282,7 @@ def check_quiz(browser, lesson_id, lesson_title, lesson_url):
 
 ## send download link mail
 def send_mail(sendto, body, subject):
-    fromaddr = "coursera.vdownloader@gmail.com"
+    fromaddr = config('EMAIL')
     toaddr = sendto
     msg = MIMEMultipart()
     msg['From'] = fromaddr
@@ -298,14 +296,16 @@ def send_mail(sendto, body, subject):
     server.ehlo()
     server.starttls()
     server.ehlo()
-    server.login("coursera.vdownloader@gmail.com", "vO4F8YP8PjIgUYzqR8Ts")
+    server.login(fromaddr, config('EMAIL_PASS'))
     text = msg.as_string()
     server.sendmail(fromaddr, toaddr, text)
     server.quit()
 
-def downloader(request, slug):
-    slug = slug.encode('utf-8')
-    details = eval(base64.b64decode(slug))
+def downloader(request, course_title):
+    # backblaze
+    b2 = B2(key_id=config('B2_KEY_ID'), application_key=config('B2_APPLICATION_KEY'))
+    bucket = b2.buckets.get('cdownloader')
+    details = {'username': request.session['username'], 'password': request.session['password'], 'course_link': request.session['course_link']}
     print('Details', details)
     opts = Options()
     opts.add_argument('--no-sandbox')
@@ -331,9 +331,8 @@ def downloader(request, slug):
         if(error=='Wrong email or password. Please try again!'):
             print('Wrong email or password. Please try again!')
             browser.quit()
-    except ConnectionRefusedError:
-        return render(request, 'download_engine/downloading.html', {"error_message": "Wrong email or password. Please try again!"})
-
+    except Exception as e:
+        print('Error caught',e)
     # give the link of course in which you are enrolled and you want to download
     course_link=details['course_link']
     course_title = [course_title for course_title in course_link.split('/') if '-' in course_title][0]
@@ -445,4 +444,4 @@ def downloader(request, slug):
     send_mail(details['username'], body, course_title)
     print('Email sent')
     browser.quit()
-    return render(request, 'download_engine/downloading.html', {"email_body": body})
+    return redirect('downloading', {"email_body": body})
