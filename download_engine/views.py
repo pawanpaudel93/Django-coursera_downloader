@@ -444,4 +444,5 @@ def downloader(request, course_title):
     send_mail(details['username'], body, course_title)
     print('Email sent')
     browser.quit()
-    return redirect('downloading', {"email_body": body})
+    request.response['email_body'] = body
+    return redirect('downloading')
