@@ -12,6 +12,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from decouple import config
+from django.http import HttpResponse
 
 # some constants
 loading_time = 2
@@ -437,15 +438,19 @@ def downloader(request, course_title):
     print('The file is uploaded')
     ## removing folders and zip
     shutil.rmtree(course_title, ignore_errors=True)
-    os.remove(course_title+'.zip')
+    # os.remove(course_title+'.zip')
     print('Files and folder has been removed as well')
     print(os.listdir(os.getcwd()))
     # getting url of the file uploaded
     file_url = "https://f000.backblazeb2.com/file/cdownloader/"+ course_title + '.zip'
-    ## send mail to downloader
+    # send mail to downloader
     body = "The download link is " + str(file_url)
     send_mail(details['email'], body, course_title)
     print('Email sent')
     browser.quit()
     request.session['email_body'] = file_url
+    # zip_file = open(PROJECT_ROOT+'/'+course_title+'.zip', 'r')
+    # response = HttpResponse(zip_file, content_type='application/force-download')
+    # response['Content-Disposition'] = 'attachment; filename="%s"' % course_title+'.zip'
+    # return response
     return redirect('downloading')

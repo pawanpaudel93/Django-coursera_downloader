@@ -7,7 +7,7 @@
             Please check your mail or don't close this tab for the download link. 
             It may take 10 minutes for the download link to appear</p>
             {%if request.session.email_body%}
-                {{Download Complete !!
+                Download Complete !!
                 <a href={{request.session.email_body}}>{{request.session.email_body}}</a>
             {%endif%}
         </h1>
