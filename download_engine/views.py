@@ -14,7 +14,7 @@ from email.mime.text import MIMEText
 from decouple import config
 
 # some constants
-loading_time = 5
+loading_time = 2
 homepage='https://www.coursera.org'
 resolution = {'low':'360','med':'540','hi':'720'}
 chosen_res = 'hi'
@@ -63,11 +63,6 @@ def get_mp4_url(browser, lesson_url):
     if lesson_url not in browser.driver.current_url:
         browser.visit(homepage+lesson_url)
         time.sleep(loading_time)
-        try:
-            button_click(browser, 'Settings')
-            browser.find_by_tag('button')[14].click()
-        except:
-            pass
         print('video playing will be paused in ' + str(loading_time) + ' seconds...')
         time.sleep(loading_time)
     try:
@@ -305,7 +300,15 @@ def downloader(request, course_title):
     # backblaze
     b2 = B2(key_id=config('B2_KEY_ID'), application_key=config('B2_APPLICATION_KEY'))
     bucket = b2.buckets.get('cdownloader')
-    details = {'email': request.session['email'],'username': request.session['username'], 'password': request.session['password'], 'course_link': request.session['course_link']}
+    email, username, password, course_link = request.session['email'], request.session['username'], request.session['password'], request.session['course_link']
+    details = {'email': email,'username': username, 'password': password, 'course_link': course_link}
+    # for popping the values in sessions
+    request.session.pop('email', None)
+    request.session.pop('username', None)
+    request.session.pop('password', None)
+    request.session.pop('course_link', None)
+    request.session.pop('email_body', None)
+    request.session.modified = True
     print('Details', details)
     opts = Options()
     opts.add_argument('--no-sandbox')
@@ -444,5 +447,5 @@ def downloader(request, course_title):
     send_mail(details['email'], body, course_title)
     print('Email sent')
     browser.quit()
-    request.session['email_body'] = body
+    request.session['email_body'] = file_url
     return redirect('downloading')
