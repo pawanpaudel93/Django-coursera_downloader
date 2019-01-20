@@ -67,22 +67,23 @@ def get_mp4_url(browser, lesson_url):
         print('video playing will be paused in ' + str(loading_time) + ' seconds...')
         time.sleep(loading_time)
     try:
-        button_click(browser, 'Play')
-        button_click(browser, 'Settings')
-        browser.find_by_tag('button')[14].click()
+        browser.find_by_css('.cif-play-circle.cif-stack-2x')[0].click()
+        browser.find_by_css('.cif-2x.cif-fw.cif-cog').click()
+        browser.find_by_css('.c-resolution-button')[1].click()
+        browser.find_by_css('.cif-play-circle.cif-stack-2x')[0].click()
     except:
         time.sleep(loading_time)
         try:
-            button_click(browser, 'Play')
-            button_click(browser, 'Settings')
-            browser.find_by_tag('button')[14].click()
+            browser.find_by_css('.cif-play-circle.cif-stack-2x')[0].click()
+            browser.find_by_css('.cif-2x.cif-fw.cif-cog').click()
+            browser.find_by_css('.c-resolution-button')[1].click()
         except:
             pass
         pass
     
     # element=browser.find_by_tag('button')[14]
-
-    mp4 = browser.find_by_tag('video').find_by_tag('source')['src']
+    mp4 = browser.find_by_css('.vjs-tech')[0]
+    mp4 = mp4['src']
     # print('Link is: ', mp4)
     # mp4 = mp4.replace('360p/',resolution[chosen_res]+'p/')
     print('Link is: ', mp4)
