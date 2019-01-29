@@ -414,6 +414,7 @@ def downloader(request, course_title):
         # Download Lecture Videos and Readings
         os.chdir(initial_dirname)
         os.chdir(safe_text(course_title))
+        lessons_i, lessons_u, lessons_t = list(set(lessons_i)), list(set(lessons_u)), list(set(lessons_t))
         lessons = zip(lessons_i, lessons_t, lessons_u)
         for a,b,c in lessons:
             print(a,b)
