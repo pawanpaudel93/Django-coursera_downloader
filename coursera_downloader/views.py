@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect
 from .forms import DownloadForm
 from django.views.generic import TemplateView
 import base64
-from download_engine.models import Course_Url
+from b2blaze import B2
+from decouple import config
 
 class Home(TemplateView):
     template_name = 'download_engine/home.html'
@@ -31,5 +32,7 @@ def downloading_file(request):
     return render(request, 'download_engine/downloading.html')
 
 def courses_links(request):
-    links = Course_Url.objects.all()
-    return render(request, 'download_engine/courses_links.html', {'links': links})
+    b2 = B2(key_id=config('B2_KEY_ID'), application_key=config('B2_APPLICATION_KEY'))
+    bucket = b2.buckets.get('cdownloader')
+    files = bucket.files.all()
+    return render(request, 'download_engine/courses_links.html', {'files': files})

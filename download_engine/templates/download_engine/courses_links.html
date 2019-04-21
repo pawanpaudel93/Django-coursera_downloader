@@ -4,9 +4,9 @@
         <div class="three wide column"></div><!-- empty div just padding -->
         <h1 class="ui ten wide column form segment raised">
             Coursera Courses Download Links<br><br>
-            {% for link in links %}
-                <a href={{link.url}}>
-                    {{link.course_title}}
+            {% for file in files %}
+                ►<a href={{file.url}}>
+                    {{file.file_name}}
                 </a>
                 <br>
             {%endfor%}

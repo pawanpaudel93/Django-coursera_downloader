@@ -13,7 +13,6 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from decouple import config
 from django.http import HttpResponse
-from .models import Course_Url
 
 # some constants
 loading_time = 2
@@ -314,7 +313,17 @@ def downloader(request, course_title):
         course_title = [course_title for course_title in course_link.split('/')][4]
     try:
         file = bucket.files.get(file_name=course_title+'.zip')
-        # request.session['email_body'] = "https://f000.backblazeb2.com/file/cdownloader/"+ course_title + '.zip'
+        # getting url of the file uploaded
+        file_url = "https://f000.backblazeb2.com/file/cdownloader/"+ course_title + '.zip'
+        
+        # send mail to downloader
+        try:
+            body = "The download link is " + str(file_url)
+            send_mail(details['email'], body, course_title)
+            print('Email sent')
+        except error as e:
+            print('Error is: ', e)
+            print('Email not sent')
         return redirect('downloading')
     except:
         print('Files not present on storage')
@@ -478,13 +487,12 @@ def downloader(request, course_title):
         file_url = "https://f000.backblazeb2.com/file/cdownloader/"+ course_title + '.zip'
         
         # send mail to downloader
-        body = "The download link is " + str(file_url)
-        send_mail(details['email'], body, course_title)
-        print('Email sent')
-        
-        # add urls to course_urls model
-        url = Course_Urls(url=str(file_url), course_title=course_title)
-        url.save()
+        try:
+            body = "The download link is " + str(file_url)
+            send_mail(details['email'], body, course_title)
+            print('Email sent')
+        except:
+            print('Email not sent')
         
         ## removing folders and zip
         shutil.rmtree(course_title, ignore_errors=True)
