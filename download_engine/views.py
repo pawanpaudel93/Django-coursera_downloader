@@ -69,23 +69,21 @@ def get_mp4_url(browser, lesson_url):
     try:
         browser.find_by_css('.cif-play-circle.cif-stack-2x')[0].click()
         browser.find_by_css('.cif-2x.cif-fw.cif-cog').click()
-        browser.find_by_css('.c-resolution-button')[1].click()
-        browser.find_by_css('.cif-play-circle.cif-stack-2x')[0].click()
+        browser.find_by_css('.cif-plus')[0].click()
+        browser.find_by_css('button.rc-PlayToggle')[0].click()
     except:
         time.sleep(loading_time)
         try:
             browser.find_by_css('.cif-play-circle.cif-stack-2x')[0].click()
             browser.find_by_css('.cif-2x.cif-fw.cif-cog').click()
-            browser.find_by_css('.c-resolution-button')[1].click()
+            browser.find_by_css('.cif-plus')[0].click()
+            browser.find_by_css('button.rc-PlayToggle')[0].click()
         except:
             pass
         pass
     
-    # element=browser.find_by_tag('button')[14]
     mp4 = browser.find_by_css('.vjs-tech')[0]
     mp4 = mp4['src']
-    # print('Link is: ', mp4)
-    # mp4 = mp4.replace('360p/',resolution[chosen_res]+'p/')
     print('Link is: ', mp4)
     return mp4
 
@@ -93,7 +91,7 @@ def get_vtt_url(browser, lesson_url):
     if lesson_url not in browser.driver.current_url:
         browser.visit(homepage+lesson_url)
         time.sleep(loading_time)
-    element = browser.find_by_id('c-video_html5_api')
+    element = browser.find_by_css('.rc-VideoItemWithHighlighting')[0]
     vtt = BeautifulSoup(element.html, 'lxml').findAll('track')[0]['src']
     vtt = homepage + vtt
     return vtt
@@ -302,12 +300,10 @@ def downloader(request, course_title):
     # backblaze
     b2 = B2(key_id=config('B2_KEY_ID'), application_key=config('B2_APPLICATION_KEY'))
     bucket = b2.buckets.get('cdownloader')
-    email, username, password, course_link = request.session['email'], request.session['username'], request.session['password'], request.session['course_link']
-    details = {'email': email,'username': username, 'password': password, 'course_link': course_link}
+    email, course_link = request.session['email'], request.session['course_link']
+    details = {'email': email, 'course_link': course_link}
     # for popping the values in sessions
     request.session.pop('email', None)
-    request.session.pop('username', None)
-    request.session.pop('password', None)
     request.session.pop('course_link', None)
     request.session.pop('email_body', None)
     request.session.modified = True
@@ -325,17 +321,23 @@ def downloader(request, course_title):
         opts.add_argument('--headless')
         opts.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
         # executable_path = {'executable_path': "/home/pawan/PycharmProjects/Django-Coursera-Downloader/cdownloader/static/coursera_downloader/chromedriver"}
-        # browser = Browser('chrome', **executable_path, chrome_options=opts, headless=True)
+        # browser = Browser('chrome', **executable_path, chrome_options=opts)
         browser = Browser('chrome', chrome_options=opts, headless=True)
 
         browser.visit('https://www.coursera.org/courses?authMode=login')
+       
+        browser.find_by_css('.Button_1w8tm98-o_O-primary_cv02ee-o_O-md_1jvotax')[0].click()
+        # button_click(browser, 'Log in with Facebook')
+        time.sleep(loading_time)
+        
+        browser.windows.current = browser.windows[1]
+        browser.fill('email', config('FB_EMAIL'))
+        browser.fill('pass', config('FB_PASSWORD'))
 
-        browser.fill('email', details['username'])
-        browser.fill('password', details['password'])
-
-        buttons = browser.find_by_tag('button')
+        buttons = browser.find_by_tag('input')
         for button in buttons:
-            if (button.text == 'Log in'):
+            if (button.value == 'Log In'):
+                print(button.value)
                 button.click()
                 break
         try:
@@ -348,9 +350,27 @@ def downloader(request, course_title):
         # give the link of course in which you are enrolled and you want to download
         # course_link=details['course_link']
         # course_title = [course_title for course_title in course_link.split('/') if '-' in course_title][0]
+        time.sleep(2*loading_time)
+        browser.windows.current = browser.windows[0]
 
         lecture_homepage = browser.driver.current_url
         browser.visit(course_link)
+        time.sleep(loading_time)
+        try:
+            enroll_button = browser.find_by_css('.Button_1w8tm98-o_O-default_s8ym6d-o_O-md_1jvotax')
+            if browser.find_by_css('.c-modal-content'):
+                print('Button-1')
+                enroll_button.click()
+                browser.find_by_id('enroll_subscribe_audit_button').click()
+            elif browser.find_by_css('.cem-body'):
+                print('Button-2')
+                time.sleep(loading_time)
+                enroll_button.click()
+                browser.find_by_css('.cif-circle-thin.cif-stack-2x')[1].double_click()
+                browser.find_by_id('course_enroll_modal_continue_button_button').click()
+                browser.find_by_css('.primary.align-horizontal-center.cozy').click()
+        except:
+            print('fail..................................................')
 
         create_download_dir(course_title)
         # find weeks
@@ -414,12 +434,13 @@ def downloader(request, course_title):
         # Download Lecture Videos and Readings
         os.chdir(initial_dirname)
         os.chdir(safe_text(course_title))
-        lessons_i, lessons_u, lessons_t = list(set(lessons_i)), list(set(lessons_u)), list(set(lessons_t))
+        # lessons_i, lessons_u, lessons_t = list(set(lessons_i)), list(set(lessons_u)), list(set(lessons_t))
+        print(lessons_i, lessons_u, lessons_t)
         lessons = zip(lessons_i, lessons_t, lessons_u)
         for a,b,c in lessons:
             print(a,b)
             first_word = b.split(' ')[0]
-            # print(first_word)
+            print(first_word)
             
             if 'Video' in first_word:
                 mp4_downloader(browser,a,b,c)
