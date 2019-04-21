@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .forms import DownloadForm
 from django.views.generic import TemplateView
 import base64
+from download_engine.models import Course_Url
 
 class Home(TemplateView):
     template_name = 'download_engine/home.html'
@@ -15,7 +16,10 @@ class Home(TemplateView):
             # base64_details = base64.b64encode(encoded_dict)
             request.session['email'] = email
             request.session['course_link'] = course_link
-            course_title = [course_title for course_title in course_link.split('/') if '-' in course_title][0]
+            try:
+                course_title = [course_title for course_title in course_link.split('/') if '-' in course_title][0]
+            except:
+                course_title = [course_title for course_title in course_link.split('/')][4]
             return redirect('downloader', course_title=course_title)
             
     
@@ -25,3 +29,7 @@ class Home(TemplateView):
 
 def downloading_file(request):
     return render(request, 'download_engine/downloading.html')
+
+def courses_links(request):
+    links = Course_Url.objects.all()
+    return render(request, 'download_engine/courses_links.html', {'links': links})

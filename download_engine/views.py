@@ -13,6 +13,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from decouple import config
 from django.http import HttpResponse
+from .models import Course_Url
 
 # some constants
 loading_time = 2
@@ -284,7 +285,6 @@ def send_mail(sendto, body, subject):
     msg['To'] = toaddr
     msg['Subject'] = "Coursera Course Download Link for " + subject
 
-    body = body
     msg.attach(MIMEText(body, 'plain'))
 
     server = smtplib.SMTP('smtp.gmail.com', 587)
@@ -308,10 +308,13 @@ def downloader(request, course_title):
     request.session.pop('email_body', None)
     request.session.modified = True
     print('Details', details)
-    course_title = [course_title for course_title in course_link.split('/') if '-' in course_title][0]
+    try:
+        course_title = [course_title for course_title in course_link.split('/') if '-' in course_title][0]
+    except:
+        course_title = [course_title for course_title in course_link.split('/')][4]
     try:
         file = bucket.files.get(file_name=course_title+'.zip')
-        request.session['email_body'] = "https://f000.backblazeb2.com/file/cdownloader/"+ course_title + '.zip'
+        # request.session['email_body'] = "https://f000.backblazeb2.com/file/cdownloader/"+ course_title + '.zip'
         return redirect('downloading')
     except:
         print('Files not present on storage')
@@ -321,11 +324,11 @@ def downloader(request, course_title):
         opts.add_argument('--headless')
         opts.binary_location = "/app/.apt/usr/bin/google-chrome-stable"
         # executable_path = {'executable_path': "/home/pawan/PycharmProjects/Django-Coursera-Downloader/cdownloader/static/coursera_downloader/chromedriver"}
-        # browser = Browser('chrome', **executable_path, chrome_options=opts)
+        # browser = Browser('chrome', **executable_path)
         browser = Browser('chrome', chrome_options=opts, headless=True)
 
         browser.visit('https://www.coursera.org/courses?authMode=login')
-       
+        time.sleep(loading_time)
         browser.find_by_css('.Button_1w8tm98-o_O-primary_cv02ee-o_O-md_1jvotax')[0].click()
         # button_click(browser, 'Log in with Facebook')
         time.sleep(loading_time)
@@ -340,13 +343,13 @@ def downloader(request, course_title):
                 print(button.value)
                 button.click()
                 break
-        try:
-            error = browser.find_by_id('login-form-error').text
-            if(error=='Wrong email or password. Please try again!'):
-                print('Wrong email or password. Please try again!')
-                browser.quit()
-        except Exception as e:
-            print('Error caught',e)
+        # try:
+        #     error = browser.find_by_id('login-form-error').text
+        #     if(error=='Wrong email or password. Please try again!'):
+        #         print('Wrong email or password. Please try again!')
+        #         browser.quit()
+        # except Exception as e:
+        #     print('Error caught',e)
         # give the link of course in which you are enrolled and you want to download
         # course_link=details['course_link']
         # course_title = [course_title for course_title in course_link.split('/') if '-' in course_title][0]
@@ -356,21 +359,24 @@ def downloader(request, course_title):
         lecture_homepage = browser.driver.current_url
         browser.visit(course_link)
         time.sleep(loading_time)
-        try:
-            enroll_button = browser.find_by_css('.Button_1w8tm98-o_O-default_s8ym6d-o_O-md_1jvotax')
-            if browser.find_by_css('.c-modal-content'):
-                print('Button-1')
-                enroll_button.click()
-                browser.find_by_id('enroll_subscribe_audit_button').click()
-            elif browser.find_by_css('.cem-body'):
-                print('Button-2')
-                time.sleep(loading_time)
-                enroll_button.click()
-                browser.find_by_css('.cif-circle-thin.cif-stack-2x')[1].double_click()
-                browser.find_by_id('course_enroll_modal_continue_button_button').click()
-                browser.find_by_css('.primary.align-horizontal-center.cozy').click()
-        except:
-            print('fail..................................................')
+        # to enroll the selected courses
+        # try:
+        #     print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+        #     enroll_button = browser.find_by_css('.Button_1w8tm98-o_O-default_s8ym6d-o_O-md_1jvotax')[0]
+        #     time.sleep(3*loading_time)
+        #     if browser.find_by_css('.rc-SubscriptionVPropFreeTrial'):
+        #         print('Button-1')
+        #         enroll_button.click()
+        #         browser.find_by_id('enroll_subscribe_audit_button').click()
+        #     elif browser.find_by_css('.enrollmentChoiceContainer'):
+        #         print('Button-2')
+        #         time.sleep(3*loading_time)
+        #         enroll_button.click()
+        #         browser.find_by_css('.cif-circle-thin.cif-stack-2x')[1].double_click()
+        #         browser.find_by_id('course_enroll_modal_continue_button_button').click()
+        #         browser.find_by_css('.primary.align-horizontal-center.cozy').click()
+        # except:
+        #     print('fail..................................................')
 
         create_download_dir(course_title)
         # find weeks
@@ -462,25 +468,29 @@ def downloader(request, course_title):
         os.chdir(initial_dirname)
         shutil.make_archive(os.getcwd()+'/'+course_title,'zip', Resource_folder)
         os.chdir(initial_dirname)
+        
         ## for uploading to backblaze
         large_file = open(course_title+'.zip', 'rb')
         zipped_file = bucket.files.upload(contents=large_file,file_name=course_title+'.zip')
         print('The file is uploaded')
-        ## removing folders and zip
-        shutil.rmtree(course_title, ignore_errors=True)
-        # os.remove(course_title+'.zip')
-        print('Files and folder has been removed as well')
-        print(os.listdir(os.getcwd()))
+        
         # getting url of the file uploaded
         file_url = "https://f000.backblazeb2.com/file/cdownloader/"+ course_title + '.zip'
+        
         # send mail to downloader
         body = "The download link is " + str(file_url)
         send_mail(details['email'], body, course_title)
         print('Email sent')
+        
+        # add urls to course_urls model
+        url = Course_Urls(url=str(file_url), course_title=course_title)
+        url.save()
+        
+        ## removing folders and zip
+        shutil.rmtree(course_title, ignore_errors=True)
+        
+        # os.remove(course_title+'.zip')
+        print('Files and folder has been removed as well')
+        print(os.listdir(os.getcwd()))
         browser.quit()
-        request.session['email_body'] = file_url
-        # zip_file = open(PROJECT_ROOT+'/'+course_title+'.zip', 'r')
-        # response = HttpResponse(zip_file, content_type='application/force-download')
-        # response['Content-Disposition'] = 'attachment; filename="%s"' % course_title+'.zip'
-        # return response
         return redirect('downloading')
