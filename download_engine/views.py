@@ -80,19 +80,26 @@ def get_mp4_url(browser, lesson_url):
             pass
         pass
     
-    mp4 = browser.find_by_css('.vjs-tech')[0]
-    mp4 = mp4['src']
-    print('Link is: ', mp4)
-    return mp4
+    try:
+        mp4 = browser.find_by_css('.vjs-tech')[0]
+        mp4 = mp4['src']
+        print('Link is: ', mp4)
+        return mp4
+    except:
+        return 'non'
+    
 
 def get_vtt_url(browser, lesson_url):
     if lesson_url not in browser.driver.current_url:
         browser.visit(homepage+lesson_url)
         time.sleep(loading_time)
-    element = browser.find_by_css('.rc-VideoItemWithHighlighting')[0]
-    vtt = BeautifulSoup(element.html, 'lxml').findAll('track')[0]['src']
-    vtt = homepage + vtt
-    return vtt
+    try:
+        element = browser.find_by_css('.rc-VideoItemWithHighlighting')[0]
+        vtt = BeautifulSoup(element.html, 'lxml').findAll('track')[0]['src']
+        vtt = homepage + vtt
+        return vtt
+    except:
+        return 'non'
 
 def vtt_downloader(browser, lesson_id, lesson_title, lesson_url):
     
@@ -104,46 +111,52 @@ def vtt_downloader(browser, lesson_id, lesson_title, lesson_url):
         print('subtitle already downloaded.')
     else:
         vtt = get_vtt_url(browser, lesson_url)
-        r = requests.get(vtt)
-        f = open(file_name, 'w')
-        f.write(r.text)
-        f.close()
-    vtt_to_srt(file_name)
-        
+        if vtt and vtt != 'non':
+            r = requests.get(vtt)
+            f = open(file_name, 'w')
+            f.write(r.text)
+            f.close()
+            vtt_to_srt(file_name)
+        else:
+            pass
+    
 def mp4_downloader(browser, lesson_id, lesson_title, lesson_url):
     
     mp4 = get_mp4_url(browser, lesson_url)
-    base_filename = lesson_id +'-'+ safe_text(lesson_title)
-    file_name = base_filename + '.mp4'
+    if mp4 and mp4 != 'non':
+        base_filename = lesson_id +'-'+ safe_text(lesson_title)
+        file_name = base_filename + '.mp4'
 
-    downloaded_size = 0
-    buffer_size = 1024
+        downloaded_size = 0
+        buffer_size = 1024
 
-    print('requesting to download...')
-    r = requests.get(mp4)
-    content_length = r.headers['Content-Length']
-    download_size = int(content_length)
-    file_exists = os.path.isfile(file_name)
-    
-    if file_exists:
+        print('requesting to download...')
+        r = requests.get(mp4)
+        content_length = r.headers['Content-Length']
+        download_size = int(content_length)
+        file_exists = os.path.isfile(file_name)
         
-        if os.path.getsize(file_name) == download_size:
-            print('mp4 already downloaded.')
+        if file_exists:
             
-    elif not file_exists:
-        
-        if r.status_code == 200:
-            f = open(file_name, 'wb')
-            for buffer in r.iter_content(buffer_size):
-                f.write(buffer)
-                downloaded_size += buffer_size
-                status='\rdownloading...' + file_name + '>>> '
-                status = status +str("{:.2f}".format(downloaded_size * 100. /download_size))+'%'
-                sys.stdout.write(status)
-                sys.stdout.flush()
-            f.close()
-        else:
-            print('please check your connection..')
+            if os.path.getsize(file_name) == download_size:
+                print('mp4 already downloaded.')
+                
+        elif not file_exists:
+            
+            if r.status_code == 200:
+                f = open(file_name, 'wb')
+                for buffer in r.iter_content(buffer_size):
+                    f.write(buffer)
+                    downloaded_size += buffer_size
+                    status='\rdownloading...' + file_name + '>>> '
+                    status = status +str("{:.2f}".format(downloaded_size * 100. /download_size))+'%'
+                    sys.stdout.write(status)
+                    sys.stdout.flush()
+                f.close()
+            else:
+                print('please check your connection..')
+    else:
+        pass
 
 def safe_text(str_text):
     erasable = [':','/']
@@ -330,170 +343,172 @@ def downloader(request, course_title):
         # executable_path = {'executable_path': "/home/pawan/PycharmProjects/Django-Coursera-Downloader/cdownloader/static/coursera_downloader/chromedriver"}
         # browser = Browser('chrome', **executable_path)
         browser = Browser('chrome', chrome_options=opts, headless=True)
-
-        browser.visit('https://www.coursera.org/courses?authMode=login')
-        time.sleep(loading_time)
-        browser.find_by_css('.Button_1w8tm98-o_O-primary_cv02ee-o_O-md_1jvotax')[0].click()
-        # button_click(browser, 'Log in with Facebook')
-        time.sleep(loading_time)
-        
-        browser.windows.current = browser.windows[1]
-        browser.fill('email', config('FB_EMAIL'))
-        browser.fill('pass', config('FB_PASSWORD'))
-
-        buttons = browser.find_by_tag('input')
-        for button in buttons:
-            if (button.value == 'Log In'):
-                print(button.value)
-                button.click()
-                break
-        # try:
-        #     error = browser.find_by_id('login-form-error').text
-        #     if(error=='Wrong email or password. Please try again!'):
-        #         print('Wrong email or password. Please try again!')
-        #         browser.quit()
-        # except Exception as e:
-        #     print('Error caught',e)
-        # give the link of course in which you are enrolled and you want to download
-        # course_link=details['course_link']
-        # course_title = [course_title for course_title in course_link.split('/') if '-' in course_title][0]
-        time.sleep(2*loading_time)
-        browser.windows.current = browser.windows[0]
-
-        lecture_homepage = browser.driver.current_url
-        browser.visit(course_link)
-        time.sleep(loading_time)
-        # to enroll the selected courses
-        # try:
-        #     print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-        #     enroll_button = browser.find_by_css('.Button_1w8tm98-o_O-default_s8ym6d-o_O-md_1jvotax')[0]
-        #     time.sleep(3*loading_time)
-        #     if browser.find_by_css('.rc-SubscriptionVPropFreeTrial'):
-        #         print('Button-1')
-        #         enroll_button.click()
-        #         browser.find_by_id('enroll_subscribe_audit_button').click()
-        #     elif browser.find_by_css('.enrollmentChoiceContainer'):
-        #         print('Button-2')
-        #         time.sleep(3*loading_time)
-        #         enroll_button.click()
-        #         browser.find_by_css('.cif-circle-thin.cif-stack-2x')[1].double_click()
-        #         browser.find_by_id('course_enroll_modal_continue_button_button').click()
-        #         browser.find_by_css('.primary.align-horizontal-center.cozy').click()
-        # except:
-        #     print('fail..................................................')
-
-        create_download_dir(course_title)
-        # find weeks
-        week = browser.find_by_css('div.rc-WeekCollectionNavigationItem > div')
-        anchors = BeautifulSoup(week.html, 'lxml').findAll('a', attrs={})
-        weeks = []
-        for a in anchors:
-            weeks.append(a['href'])
-
-        print(weeks, len(weeks))
-        # video LINKS
-        lessons_i = []
-        lessons_t = []
-        lessons_u = []
-        w_digit = len(str(len(weeks)))
-        for w in range(len(weeks)):
-            
-            print('collecting lessons title and urls...\n')    
-            browser.visit(homepage + weeks[w])
-            time.sleep(loading_time)
-            w = w+1
-            
-            print('\nVisiting week: ' + str(w))
-            time.sleep(loading_time)
-            module_lessons = browser.find_by_css('div.rc-ModuleLessons')
-            print()
-            print('Week '+str(w)+' titles:')
-            seq = 0
-            for i, module_lesson in enumerate(module_lessons):
-
-                lessons_title = module_lesson.find_by_xpath("//*[contains(@class,'rc-WeekItemName headline-1-text')]")
-
-                for j, l in enumerate(lessons_title):
-                    seq  += 1
-                    lesson_id = str(w*100+seq).zfill(w_digit+2)
-                    title = l.text.replace('\n',' ')
-                    print(lesson_id, title)
-                    title = safe_text(title)
-                    lessons_t.append(title)
-                    lessons_i.append(lesson_id)
-            
-            print()
-            print('Week '+str(w)+' links:')    
-            seq = 0
-
-            for i, module_lesson in enumerate(module_lessons):
-
-                lessons_url = module_lesson.find_by_tag('ul')
-            
-                for j, e in enumerate(lessons_url):
-                    anchors = BeautifulSoup(e.html, 'lxml').findAll('a')
-                    for k, a in enumerate(anchors):
-                        seq += 1
-                        lesson_id = str(w*100+seq).zfill(w_digit+2)
-                        lesson_url = a['href']
-                        print(lesson_id, lesson_url)
-                        lessons_u.append(lesson_url)
-                
-            print()
-        
-        # Download Lecture Videos and Readings
-        os.chdir(initial_dirname)
-        os.chdir(safe_text(course_title))
-        # lessons_i, lessons_u, lessons_t = list(set(lessons_i)), list(set(lessons_u)), list(set(lessons_t))
-        print(lessons_i, lessons_u, lessons_t)
-        lessons = zip(lessons_i, lessons_t, lessons_u)
-        for a,b,c in lessons:
-            print(a,b)
-            first_word = b.split(' ')[0]
-            print(first_word)
-            
-            if 'Video' in first_word:
-                mp4_downloader(browser,a,b,c)
-                vtt_downloader(browser,a,b,c)
-                print()
-                
-            elif 'Quiz' in first_word:
-                check_quiz(browser,a, b, c)
-                print()        
-            
-            else:
-                print('other resource')
-                check_html_reading(browser,a,b,c)
-                print()
-                
-            print()
-        print('Resources downloaded to:\n'+os.getcwd())
-        Resource_folder = os.getcwd() #Folder which is to be zipped
-        os.chdir(initial_dirname)
-        shutil.make_archive(os.getcwd()+'/'+course_title,'zip', Resource_folder)
-        os.chdir(initial_dirname)
-        
-        ## for uploading to backblaze
-        large_file = open(course_title+'.zip', 'rb')
-        zipped_file = bucket.files.upload(contents=large_file,file_name=course_title+'.zip')
-        print('The file is uploaded')
-        
-        # getting url of the file uploaded
-        file_url = "https://f000.backblazeb2.com/file/cdownloader/"+ course_title + '.zip'
-        
-        # send mail to downloader
         try:
-            body = "The download link is " + str(file_url)
-            send_mail(details['email'], body, course_title)
-            print('Email sent')
+            browser.visit('https://www.coursera.org/courses?authMode=login')
+            time.sleep(loading_time)
+            browser.find_by_css('.Button_1w8tm98-o_O-primary_cv02ee-o_O-md_1jvotax')[0].click()
+            # button_click(browser, 'Log in with Facebook')
+            time.sleep(loading_time)
+            
+            browser.windows.current = browser.windows[1]
+            browser.fill('email', config('FB_EMAIL'))
+            browser.fill('pass', config('FB_PASSWORD'))
+
+            buttons = browser.find_by_tag('input')
+            for button in buttons:
+                if (button.value == 'Log In'):
+                    print(button.value)
+                    button.click()
+                    break
+            # try:
+            #     error = browser.find_by_id('login-form-error').text
+            #     if(error=='Wrong email or password. Please try again!'):
+            #         print('Wrong email or password. Please try again!')
+            #         browser.quit()
+            # except Exception as e:
+            #     print('Error caught',e)
+            # give the link of course in which you are enrolled and you want to download
+            # course_link=details['course_link']
+            # course_title = [course_title for course_title in course_link.split('/') if '-' in course_title][0]
+            time.sleep(2*loading_time)
+            browser.windows.current = browser.windows[0]
+
+            lecture_homepage = browser.driver.current_url
+            browser.visit(course_link)
+            time.sleep(loading_time)
+            # to enroll the selected courses
+            # try:
+            #     print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+            #     enroll_button = browser.find_by_css('.Button_1w8tm98-o_O-default_s8ym6d-o_O-md_1jvotax')[0]
+            #     time.sleep(3*loading_time)
+            #     if browser.find_by_css('.rc-SubscriptionVPropFreeTrial'):
+            #         print('Button-1')
+            #         enroll_button.click()
+            #         browser.find_by_id('enroll_subscribe_audit_button').click()
+            #     elif browser.find_by_css('.enrollmentChoiceContainer'):
+            #         print('Button-2')
+            #         time.sleep(3*loading_time)
+            #         enroll_button.click()
+            #         browser.find_by_css('.cif-circle-thin.cif-stack-2x')[1].double_click()
+            #         browser.find_by_id('course_enroll_modal_continue_button_button').click()
+            #         browser.find_by_css('.primary.align-horizontal-center.cozy').click()
+            # except:
+            #     print('fail..................................................')
+
+            create_download_dir(course_title)
+            # find weeks
+            week = browser.find_by_css('div.rc-WeekCollectionNavigationItem > div')
+            anchors = BeautifulSoup(week.html, 'lxml').findAll('a', attrs={})
+            weeks = []
+            for a in anchors:
+                weeks.append(a['href'])
+
+            print(weeks, len(weeks))
+            # video LINKS
+            lessons_i = []
+            lessons_t = []
+            lessons_u = []
+            w_digit = len(str(len(weeks)))
+            for w in range(len(weeks)):
+                
+                print('collecting lessons title and urls...\n')    
+                browser.visit(homepage + weeks[w])
+                time.sleep(loading_time)
+                w = w+1
+                
+                print('\nVisiting week: ' + str(w))
+                time.sleep(loading_time)
+                module_lessons = browser.find_by_css('div.rc-ModuleLessons')
+                print()
+                print('Week '+str(w)+' titles:')
+                seq = 0
+                for i, module_lesson in enumerate(module_lessons):
+
+                    lessons_title = module_lesson.find_by_xpath("//*[contains(@class,'rc-WeekItemName headline-1-text')]")
+
+                    for j, l in enumerate(lessons_title):
+                        seq  += 1
+                        lesson_id = str(w*100+seq).zfill(w_digit+2)
+                        title = l.text.replace('\n',' ')
+                        print(lesson_id, title)
+                        title = safe_text(title)
+                        lessons_t.append(title)
+                        lessons_i.append(lesson_id)
+                
+                print()
+                print('Week '+str(w)+' links:')    
+                seq = 0
+
+                for i, module_lesson in enumerate(module_lessons):
+
+                    lessons_url = module_lesson.find_by_tag('ul')
+                
+                    for j, e in enumerate(lessons_url):
+                        anchors = BeautifulSoup(e.html, 'lxml').findAll('a')
+                        for k, a in enumerate(anchors):
+                            seq += 1
+                            lesson_id = str(w*100+seq).zfill(w_digit+2)
+                            lesson_url = a['href']
+                            print(lesson_id, lesson_url)
+                            lessons_u.append(lesson_url)
+                    
+                print()
+            
+            # Download Lecture Videos and Readings
+            os.chdir(initial_dirname)
+            os.chdir(safe_text(course_title))
+            # lessons_i, lessons_u, lessons_t = list(set(lessons_i)), list(set(lessons_u)), list(set(lessons_t))
+            print(lessons_i, lessons_u, lessons_t)
+            lessons = zip(lessons_i, lessons_t, lessons_u)
+            for a,b,c in lessons:
+                print(a,b)
+                first_word = b.split(' ')[0]
+                print(first_word)
+                
+                if 'Video' in first_word:
+                    mp4_downloader(browser,a,b,c)
+                    vtt_downloader(browser,a,b,c)
+                    print()
+                    
+                elif 'Quiz' in first_word:
+                    check_quiz(browser,a, b, c)
+                    print()        
+                
+                else:
+                    print('other resource')
+                    check_html_reading(browser,a,b,c)
+                    print()
+                    
+                print()
+            print('Resources downloaded to:\n'+os.getcwd())
+            Resource_folder = os.getcwd() #Folder which is to be zipped
+            os.chdir(initial_dirname)
+            shutil.make_archive(os.getcwd()+'/'+course_title,'zip', Resource_folder)
+            os.chdir(initial_dirname)
+            
+            ## for uploading to backblaze
+            large_file = open(course_title+'.zip', 'rb')
+            zipped_file = bucket.files.upload(contents=large_file,file_name=course_title+'.zip')
+            print('The file is uploaded')
+            
+            # getting url of the file uploaded
+            file_url = "https://f000.backblazeb2.com/file/cdownloader/"+ course_title + '.zip'
+            
+            # send mail to downloader
+            try:
+                body = "The download link is " + str(file_url)
+                send_mail(details['email'], body, course_title)
+                print('Email sent')
+            except:
+                print('Email not sent')
+            
+            ## removing folders and zip
+            shutil.rmtree(course_title, ignore_errors=True)
+            
+            # os.remove(course_title+'.zip')
+            print('Files and folder has been removed as well')
+            print(os.listdir(os.getcwd()))
+            browser.quit()
+            return redirect('downloading')
         except:
-            print('Email not sent')
-        
-        ## removing folders and zip
-        shutil.rmtree(course_title, ignore_errors=True)
-        
-        # os.remove(course_title+'.zip')
-        print('Files and folder has been removed as well')
-        print(os.listdir(os.getcwd()))
-        browser.quit()
-        return redirect('downloading')
+            browser.quit()
