@@ -20,8 +20,6 @@ homepage='https://www.coursera.org'
 resolution = {'low':'360','med':'540','hi':'720'}
 chosen_res = 'hi'
 initial_dirname = os.getcwd()
-# executable_path = {'executable_path': PROJECT_ROOT+"/static/coursera_downloader/chromedriver"}
-# browser = Browser('chrome', **executable_path)
 
 ####
 
@@ -286,9 +284,7 @@ def send_mail(sendto, body, subject):
 
     msg.attach(MIMEText(body, 'plain'))
 
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.ehlo()
-    server.starttls()
+    server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
     server.ehlo()
     server.login(fromaddr, config('EMAIL_PASS'))
     text = msg.as_string()
@@ -321,10 +317,9 @@ def downloader(request, course_title):
             body = "The download link is " + str(file_url)
             send_mail(details['email'], body, course_title)
             print('Email sent')
-        except error as e:
-            print('Error is: ', e)
+        except:
             print('Email not sent')
-        return redirect('downloading')
+        return render(request, 'download_engine/downloading.html', {'url': file_url})
     except:
         print('Files not present on storage')
         opts = Options()
