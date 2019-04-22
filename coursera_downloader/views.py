@@ -35,4 +35,6 @@ def courses_links(request):
     b2 = B2(key_id=config('B2_KEY_ID'), application_key=config('B2_APPLICATION_KEY'))
     bucket = b2.buckets.get('cdownloader')
     files = bucket.files.all()
+    for file in files:
+        file.link = "https://f000.backblazeb2.com/file/cdownloader/"+ file.file_name
     return render(request, 'download_engine/courses_links.html', {'files': files})

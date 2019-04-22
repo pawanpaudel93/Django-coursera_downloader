@@ -509,6 +509,6 @@ def downloader(request, course_title):
             print('Files and folder has been removed as well')
             print(os.listdir(os.getcwd()))
             browser.quit()
-            return redirect('downloading')
+            return render(request, 'download_engine/courses_links.html', {'url': file_url})
         except:
             browser.quit()

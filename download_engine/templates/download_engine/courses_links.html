@@ -1,11 +1,17 @@
 {% extends 'base.html' %}
 {% block content %}
+    {% if url%}
+        <script type="text/javascript"> 
+            var delay = 3000; 
+            window.setTimeout(function(){ window.location.href = "{{url}}";}, delay);
+        </script>
+    {%endif%}
     <div class="ui column stackable center page grid">
         <div class="three wide column"></div><!-- empty div just padding -->
         <h1 class="ui ten wide column form segment raised">
             Coursera Courses Download Links<br><br>
             {% for file in files %}
-                ►<a href={{file.url}}>
+                ►<a href={{file.link}}>
                     {{file.file_name}}
                 </a>
                 <br>
