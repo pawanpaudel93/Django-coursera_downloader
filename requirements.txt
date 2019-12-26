@@ -30,7 +30,7 @@ soupsieve==1.7
 splinter==0.10.0
 typed-ast==1.1.1
 urllib3==1.23
-waitress==1.2.0
+waitress==1.4.1
 whitenoise==4.1.2
 wrapt==1.11.0
 xvfbwrapper==0.2.9
